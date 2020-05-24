@@ -3,7 +3,6 @@ from torch import nn
 from torch.nn import functional as F
 from poolings import *
 from CNNs import *
-from ResNets import *
 
 class SpeakerClassifier(nn.Module):
 
@@ -26,7 +25,7 @@ class SpeakerClassifier(nn.Module):
         self.pooling_method = parameters.pooling_method
         self.loss = parameters.loss
 
-        elif parameters.pooling_method == 'attention':
+        if parameters.pooling_method == 'attention':
             self.PoolingLayer = Attention(self.vector_size)
             self.fc1 = nn.Linear(self.vector_size, parameters.embedding_size)
             self.b1 = nn.BatchNorm1d(parameters.embedding_size)
