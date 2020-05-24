@@ -8,7 +8,7 @@ import copy
 
 def new_parameter(*size):
     out = torch.nn.Parameter(torch.FloatTensor(*size))
-    torch.nn.init.xavier_normal(out)
+    torch.nn.init.xavier_normal_(out)
     return out
 
 class Attention(nn.Module):
@@ -34,7 +34,7 @@ class HeadAttention(nn.Module):
 
     def __init__(self, encoder_size, heads_number, mask_prob = 0.25, attentionSmoothing=False):
 
-        super(AttentionV4, self).__init__()
+        super(HeadAttention, self).__init__()
         self.embedding_size = encoder_size//heads_number
         self.att=new_parameter(self.embedding_size,1)
         self.embedding_layer = nn.Linear(self.embedding_size, self.embedding_size)
@@ -114,7 +114,7 @@ class MultiHeadedAttention(nn.Module):
 
 class MultiHeadedAttentionNoLastDense(nn.Module):
     def __init__(self, encoder_size, heads_number):
-        super(SmartMultiHeadedAttentionV2, self).__init__()
+        super(MultiHeadedAttentionNoLastDense, self).__init__()
         self.encoder_size = encoder_size
         assert self.encoder_size % heads_number == 0 # d_model
         self.head_size = self.encoder_size // heads_number
@@ -136,12 +136,12 @@ class MultiHeadedAttentionNoLastDense(nn.Module):
         x, self.alignment = innerKeyValueAttention(self.query, key, value)
         return x.view(x.size(0),-1), copy.copy(self.alignment)
 
-class MHAMixedAttention(nn.Module):
-    def __init__(self, encoder_size, heads_number, mask_prob=0.25):
-        super(MHAMixedAttentionV5, self).__init__()
+class DoubleMHA(nn.Module):
+    def __init__(self, encoder_size, heads_number, mask_prob=0.2):
+        super(DoubleMHA, self).__init__()
         self.heads_number = heads_number
         self.heads_size = encoder_size // heads_number
-        self.utteranceAttention = SmartMultiHeadedAttentionV2(encoder_size, heads_number)
+        self.utteranceAttention = MultiHeadedAttentionNoLastDense(encoder_size, heads_number)
         self.headsAttention = HeadAttention(encoder_size, heads_number, mask_prob=mask_prob, attentionSmoothing=False)
 
     def getAlignments(self, x):
