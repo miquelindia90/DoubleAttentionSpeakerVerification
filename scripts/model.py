@@ -32,15 +32,15 @@ class SpeakerClassifier(nn.Module):
             self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
             self.b2 = nn.BatchNorm1d(parameters.embedding_size)
         
-        elif parameters.pooling_method == 'multihead_attention':
+        elif parameters.pooling_method == 'MHA':
             self.PoolingLayer = MultiHeadedAttention(self.vector_size, parameters.heads_number)
             self.fc1 = nn.Linear(int(self.vector_size), parameters.embedding_size)
             self.b1 = nn.BatchNorm1d(parameters.embedding_size)
             self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
             self.b2 = nn.BatchNorm1d(parameters.embedding_size)
 
-        elif parameters.pooling_method == 'MHAMixedAttentionV5':
-            self.PoolingLayer = MHAMixedAttentionV5(self.vector_size, parameters.heads_number, mask_prob = parameters.mask_prob)
+        elif parameters.pooling_method == 'DoubleMHA':
+            self.PoolingLayer = DoubleMHA(self.vector_size, parameters.heads_number)
             self.fc1 = nn.Linear(self.vector_size//parameters.heads_number, parameters.embedding_size)
             self.b1 = nn.BatchNorm1d(parameters.embedding_size)
             self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
