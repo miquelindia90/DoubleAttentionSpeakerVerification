@@ -15,11 +15,11 @@ class SpeakerClassifier(nn.Module):
         self.device = device
         
         if parameters.front_end=='VGG3L':
-            self.vector_size = getVGG3LOutputDimension(parameters.feature_size, inputChannel=1, outputChannel=parameters.kernel_size)
+            self.vector_size = getVGG3LOutputDimension(parameters.feature_size, outputChannel=parameters.kernel_size)
             self.front_end = VGG3L(parameters.kernel_size)
         
         if parameters.front_end=='VGG4L':
-            self.vector_size = getVGG4LOutputDimension(parameters.feature_size, inputChannel=1, outputChannel=parameters.kernel_size)
+            self.vector_size = getVGG4LOutputDimension(parameters.feature_size, outputChannel=parameters.kernel_size)
             self.front_end = VGG4L(parameters.kernel_size)
         
         self.pooling_method = parameters.pooling_method

@@ -24,7 +24,7 @@ class VGG3L(torch.nn.Module):
     def __init__(self, kernel_size):
         super(VGG3L, self).__init__()
 
-        self.conv11 = torch.nn.Conv2d(inputChannel, int(kernel_size/4), 3, stride=1, padding=1)
+        self.conv11 = torch.nn.Conv2d(1, int(kernel_size/4), 3, stride=1, padding=1)
         self.conv12 = torch.nn.Conv2d(int(kernel_size/4), int(kernel_size/4), 3, stride=1, padding=1)
         self.conv21 = torch.nn.Conv2d(int(kernel_size/4), int(kernel_size/2), 3, stride=1, padding=1)
         self.conv22 = torch.nn.Conv2d(int(kernel_size/2), int(kernel_size/2), 3, stride=1, padding=1)
@@ -56,7 +56,7 @@ class VGG4L(torch.nn.Module):
     def __init__(self, kernel_size):
         super(VGG4L, self).__init__()
 
-        self.conv11 = torch.nn.Conv2d(inputChannel, int(kernel_size/8), 3, stride=1, padding=1)
+        self.conv11 = torch.nn.Conv2d(1, int(kernel_size/8), 3, stride=1, padding=1)
         self.conv12 = torch.nn.Conv2d(int(kernel_size/8), int(kernel_size/8), 3, stride=1, padding=1)
         self.conv21 = torch.nn.Conv2d(int(kernel_size/8), int(kernel_size/4), 3, stride=1, padding=1)
         self.conv22 = torch.nn.Conv2d(int(kernel_size/4), int(kernel_size/4), 3, stride=1, padding=1)
