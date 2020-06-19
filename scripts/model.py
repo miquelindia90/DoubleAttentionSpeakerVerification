@@ -36,8 +36,10 @@ class SpeakerClassifier(nn.Module):
         
         self.fc1 = nn.Linear(self.vector_size, parameters.embedding_size)
         self.b1 = nn.BatchNorm1d(parameters.embedding_size)
-        self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
+        self.fc2 = nn.Linear(parameters.embedding_size, parameters.embedding_size)
         self.b2 = nn.BatchNorm1d(parameters.embedding_size)
+        self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
+        self.b3 = nn.BatchNorm1d(parameters.embedding_size)
         
         if parameters.loss == 'Softmax':
             self.predictionLayer = nn.Linear(parameters.embedding_size, parameters.num_spkrs)
@@ -49,21 +51,21 @@ class SpeakerClassifier(nn.Module):
     def forward(self, x):
 
         encoder_output = self.front_end(x)
-        layer, alignment = self.PoolingLayer(encoder_output)
-        embedding1 = F.relu(self.fc1(layer))
-        embedding1 = self.be1(embedding1)
+
+        embedding0, alignment = self.PoolingLayer(encoder_output)
+        embedding1 = self.b1(F.relu(self.fc1(embedding0)))
+        embedding2 = self.b2(F.relu(self.fc2(embedding1)))
                 
         if self.loss == 'Softmax':
-            embedding2 = F.relu(self.preLayer(embedding))
-            embedding2 = self.b2(embedding2)
-            prediction = self.prediction_Layer(embedding2)
+            embedding3 = self.b3(F.relu(self.preLayer(embedding2)))
+            prediction = self.predictionLayer(embedding3)
 
         elif self.loss == 'AMSoftmax':
-            embedding2 = self.preLayer(embedding)
+            embedding3 = self.preLayer(embedding2)
             for W in self.predictionLayer.parameters():
                 W = F.normalize(W, dim=1)
-            embedding2 = F.normalize(embedding2, dim=1)
-            prediction = self.prediction_Layer(embedding2)
+            embedding3 = F.normalize(embedding3, dim=1)
+            prediction = self.predictionLayer(embedding3)
 
-        return encoder_output, self.__L2(embedding), prediction
+        return encoder_output, embedding2, prediction
 

@@ -18,16 +18,14 @@ class Attention(nn.Module):
         super(Attention, self).__init__()
         self.embedding_size = embedding_size
         self.att=new_parameter(self.embedding_size,1)
-        self.embedding_layer = nn.Linear(self.embedding_size, self.embedding_size)
 
     def forward(self,ht):
         attention_score = torch.matmul(ht, self.att).squeeze()
-        attention_score = F.softmax(attention_score).view(ht.size(0), ht.size(1),1)
+        attention_score = F.softmax(attention_score, dim=-1).view(ht.size(0), ht.size(1),1)
         weighted_ht = ht * attention_score
         ct = torch.sum(weighted_ht,dim=1)
-        embedding = self.embedding_layer(ct)
 
-        return F.relu(embedding), attention_score
+        return ct, attention_score
 
 
 class HeadAttention(nn.Module):
@@ -37,7 +35,6 @@ class HeadAttention(nn.Module):
         super(HeadAttention, self).__init__()
         self.embedding_size = encoder_size//heads_number
         self.att=new_parameter(self.embedding_size,1)
-        self.embedding_layer = nn.Linear(self.embedding_size, self.embedding_size)
         self.mask_prob = int(1/mask_prob)
         self.attentionSmoothing = attentionSmoothing
 
@@ -52,7 +49,7 @@ class HeadAttention(nn.Module):
         attention_score = torch.matmul(new_ht, self.att).squeeze()
         if self.training:
             attention_score = self.__maskAttention(attention_score)
-        attention_score = F.softmax(attention_score).view(new_ht.size(0), new_ht.size(1),1)
+        attention_score = F.softmax(attention_score, dim=-1).view(new_ht.size(0), new_ht.size(1),1)
         return attention_score 
 
     def __wideAttention(self):
@@ -72,9 +69,8 @@ class HeadAttention(nn.Module):
 
         weighted_ht = ht * attention_score
         ct = torch.sum(weighted_ht,dim=1)
-        embedding = self.embedding_layer(ct)
 
-        return F.relu(embedding), attention_score
+        return ct, attention_score
 
 def innerKeyValueAttention(query, key, value):
 
@@ -95,7 +91,6 @@ class MultiHeadAttention(nn.Module):
         self.heads_number = heads_number
         self.query = new_parameter(self.head_size, self.heads_number)
         self.aligmment = None
-        self.embedding_layer = nn.Linear(self.encoder_size, self.encoder_size)
         
     def getAlignments(self,x): 
         batch_size = x.size(0)
@@ -109,7 +104,7 @@ class MultiHeadAttention(nn.Module):
         key = x.view(batch_size*x.size(1), self.heads_number, self.head_size)
         value = x.view(batch_size,-1,self.heads_number, self.head_size)
         x, self.alignment = innerKeyValueAttention(self.query, key, value)
-        return F.relu(self.embedding_layer(x.view(x.size(0),-1))), copy.copy(self.alignment)
+        return x.view(x.size(0),-1), copy.copy(self.alignment)
 
 
 class MultiHeadAttentionNoLastDense(nn.Module):
