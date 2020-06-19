@@ -23,35 +23,30 @@ class SpeakerClassifier(nn.Module):
             self.front_end = VGG4L(parameters.kernel_size)
         
         self.pooling_method = parameters.pooling_method
-        self.loss = parameters.loss
 
         if parameters.pooling_method == 'attention':
             self.PoolingLayer = Attention(self.vector_size)
-            self.fc1 = nn.Linear(self.vector_size, parameters.embedding_size)
-            self.b1 = nn.BatchNorm1d(parameters.embedding_size)
-            self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
-            self.b2 = nn.BatchNorm1d(parameters.embedding_size)
         
         elif parameters.pooling_method == 'MHA':
             self.PoolingLayer = MultiHeadedAttention(self.vector_size, parameters.heads_number)
-            self.fc1 = nn.Linear(int(self.vector_size), parameters.embedding_size)
-            self.b1 = nn.BatchNorm1d(parameters.embedding_size)
-            self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
-            self.b2 = nn.BatchNorm1d(parameters.embedding_size)
 
         elif parameters.pooling_method == 'DoubleMHA':
             self.PoolingLayer = DoubleMHA(self.vector_size, parameters.heads_number)
-            self.fc1 = nn.Linear(self.vector_size//parameters.heads_number, parameters.embedding_size)
-            self.b1 = nn.BatchNorm1d(parameters.embedding_size)
-            self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
-            self.b2 = nn.BatchNorm1d(parameters.embedding_size)
+            self.vector_size = self.vector_size//parameters.heads_number
+        
+        self.fc1 = nn.Linear(self.vector_size, parameters.embedding_size)
+        self.b1 = nn.BatchNorm1d(parameters.embedding_size)
+        self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
+        self.b2 = nn.BatchNorm1d(parameters.embedding_size)
         
         if parameters.loss == 'Softmax':
             self.predictionLayer = nn.Linear(parameters.embedding_size, parameters.num_spkrs)
         elif parameters.loss == 'AMSoftmax':
             self.predictionLayer = nn.Linear(parameters.embedding_size, parameters.num_spkrs, bias=False)
+        
+        self.loss = parameters.loss
 
-    def forward(self, x, label=None):
+    def forward(self, x):
 
         encoder_output = self.front_end(x)
         layer, alignment = self.PoolingLayer(encoder_output)
