@@ -1,4 +1,4 @@
-numpy
-torch
-librosa
-soundfile
+numpy==1.18.5
+torch==1.5
+librosa==0.7.2
+soundfile==0.10.3.post1
