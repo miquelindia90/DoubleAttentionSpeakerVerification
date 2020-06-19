@@ -28,7 +28,7 @@ class SpeakerClassifier(nn.Module):
             self.PoolingLayer = Attention(self.vector_size)
         
         elif parameters.pooling_method == 'MHA':
-            self.PoolingLayer = MultiHeadedAttention(self.vector_size, parameters.heads_number)
+            self.PoolingLayer = MultiHeadAttention(self.vector_size, parameters.heads_number)
 
         elif parameters.pooling_method == 'DoubleMHA':
             self.PoolingLayer = DoubleMHA(self.vector_size, parameters.heads_number)
