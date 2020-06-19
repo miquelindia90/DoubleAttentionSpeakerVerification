@@ -86,9 +86,9 @@ def innerKeyValueAttention(query, key, value):
     return ct, p_attn
 
 
-class MultiHeadedAttention(nn.Module):
+class MultiHeadAttention(nn.Module):
     def __init__(self, encoder_size, heads_number):
-        super(SmartMultiHeadedAttention, self).__init__()
+        super(MultiHeadAttention, self).__init__()
         self.encoder_size = encoder_size
         assert self.encoder_size % heads_number == 0 # d_model
         self.head_size = self.encoder_size // heads_number 
@@ -112,9 +112,9 @@ class MultiHeadedAttention(nn.Module):
         return F.relu(self.embedding_layer(x.view(x.size(0),-1))), copy.copy(self.alignment)
 
 
-class MultiHeadedAttentionNoLastDense(nn.Module):
+class MultiHeadAttentionNoLastDense(nn.Module):
     def __init__(self, encoder_size, heads_number):
-        super(MultiHeadedAttentionNoLastDense, self).__init__()
+        super(MultiHeadAttentionNoLastDense, self).__init__()
         self.encoder_size = encoder_size
         assert self.encoder_size % heads_number == 0 # d_model
         self.head_size = self.encoder_size // heads_number
@@ -141,7 +141,7 @@ class DoubleMHA(nn.Module):
         super(DoubleMHA, self).__init__()
         self.heads_number = heads_number
         self.heads_size = encoder_size // heads_number
-        self.utteranceAttention = MultiHeadedAttentionNoLastDense(encoder_size, heads_number)
+        self.utteranceAttention = MultiHeadAttentionNoLastDense(encoder_size, heads_number)
         self.headsAttention = HeadAttention(encoder_size, heads_number, mask_prob=mask_prob, attentionSmoothing=False)
 
     def getAlignments(self, x):
