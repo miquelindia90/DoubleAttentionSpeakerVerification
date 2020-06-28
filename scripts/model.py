@@ -53,7 +53,7 @@ class SpeakerClassifier(nn.Module):
         encoder_output = self.front_end(x)
 
         embedding0, alignment = self.PoolingLayer(encoder_output)
-        embedding1 = self.b1(F.relu(self.fc1(embedding0)))
+        embedding1 = F.relu(self.fc1(embedding0))
         embedding2 = self.b2(F.relu(self.fc2(embedding1)))
                 
         if self.loss == 'Softmax':
