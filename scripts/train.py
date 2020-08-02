@@ -286,7 +286,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(description='Train a CNN Syamese')
    
     parser.add_argument('--train_data_dir', type=str, default='/scratch/speaker_databases/', help='data directory.')
-    parser.add_argument('--valid_data_dir', type=str, default='/scratch/speaker_databases/', help='data directory.')
+    parser.add_argument('--valid_data_dir', type=str, default='/scratch/speaker_databases/VoxCeleb-1/wav', help='data directory.')
     parser.add_argument('--train_labels_path', type = str, default = 'labels/all.ndx')
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
