@@ -24,14 +24,15 @@ class SpeakerClassifier(nn.Module):
         
         self.pooling_method = parameters.pooling_method
 
-        if parameters.pooling_method == 'attention':
+        if parameters.pooling_method == 'Statistical':
+            self.PoolingLayer = StatisticalPooling()
+            self.vector_size *= 2
+        elif parameters.pooling_method == 'Attention':
             self.PoolingLayer = Attention(self.vector_size)
-        
         elif parameters.pooling_method == 'MHA':
             self.PoolingLayer = MultiHeadAttention(self.vector_size, parameters.heads_number)
-
         elif parameters.pooling_method == 'DoubleMHA':
-            self.PoolingLayer = DoubleMHA(self.vector_size, parameters.heads_number)
+            self.PoolingLayer = DoubleMHA(self.vector_size, parameters.heads_number, mask_prob = parameters.mask_prob)
             self.vector_size = self.vector_size//parameters.heads_number
         
         self.fc1 = nn.Linear(self.vector_size, parameters.embedding_size)
