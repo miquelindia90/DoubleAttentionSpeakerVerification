@@ -11,6 +11,20 @@ def new_parameter(*size):
     torch.nn.init.xavier_normal_(out)
     return out
 
+class StatisticalPooling(nn.Module):
+
+    def __init__(self, eps=0.0001):
+        super(StatisticalPooling, self).__init__()
+        self.eps = eps
+    def forward(self, ht):
+
+        if self.training:
+            ht = ht + torch.randn(ht.size()).cuda()*self.eps
+        mean = torch.mean(ht, dim=1)
+        std = torch.std(ht, dim=1)
+        return torch.cat((mean, std), dim=1), None
+
+
 class Attention(nn.Module):
 
     def __init__(self, embedding_size):
