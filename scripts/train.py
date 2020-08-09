@@ -287,13 +287,13 @@ if __name__=="__main__":
    
     parser.add_argument('--train_data_dir', type=str, default='/scratch/speaker_databases/', help='data directory.')
     parser.add_argument('--valid_data_dir', type=str, default='/scratch/speaker_databases/VoxCeleb-1/wav', help='data directory.')
-    parser.add_argument('--train_labels_path', type = str, default = 'labels/all.ndx')
+    parser.add_argument('--train_labels_path', type = str, default = 'labels/Vox2.ndx')
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
-    parser.add_argument('--out_dir', type=str, default='./models/model1', help='directory where data is saved')
+    parser.add_argument('--out_dir', type=str, default='./models/model3', help='directory where data is saved')
     parser.add_argument('--model_name', type=str, default='CNN', help='Model associated to the model builded')
-    parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L'], help='Kind of Front-end Used')
+    parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L','ResNet4L'], help='Kind of Front-end Used')
     
     # Network Parameteres
     parser.add_argument('--window_size', type=float, default=3.5, help='number of seconds per window')
@@ -301,7 +301,8 @@ if __name__=="__main__":
     parser.add_argument('--kernel_size', type=int, default=1024)
     parser.add_argument('--embedding_size', type=int, default=400)
     parser.add_argument('--heads_number', type=int, default=16)
-    parser.add_argument('--pooling_method', type=str, default='DoubleMHA', choices=['attention', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
+    parser.add_argument('--pooling_method', type=str, default='DoubleMHA', choices=['Attention', 'Statistical', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
+    parser.add_argument('--mask_prob', type=float, default=0.35, help='Masking Drop Probability. Only Used for Only Double MHA')
  
     # Losses 
     parser.add_argument('--loss', type=str, choices=['Softmax', 'AMSoftmax'], default='AMSoftmax', help='type of loss function')
@@ -325,10 +326,10 @@ if __name__=="__main__":
     # parse input params
     params=parser.parse_args()
     params.model_name = getModelName(params)
+    params.num_spkrs = 5994
 
-    params.num_spkrs = 7205
-
-    print(params)
+    if not os.path.exists(params.out_dir):
+        os.makedirs(params.out_dir)
 
     with open(params.out_dir + '/' + params.model_name + '_config.pkl', 'wb') as handle:
         pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
