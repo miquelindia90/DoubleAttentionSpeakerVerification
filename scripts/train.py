@@ -129,12 +129,7 @@ class Trainer:
             print('New Learning Rate: {}'.format(paramGroup['lr']))
     
     def __load_criterion(self):
-        if params.loss == 'Softmax':
             self.criterion = nn.CrossEntropyLoss()
-        elif params.loss=='AMSoftmax':
-            self.criterion = AMSoftmax(s=self.params.scalingFactor, m=self.params.marginFactor).to(self.device)
-        elif params.loss=='AMSoftmaxV2':
-            self.criterion = AMSoftmax(s=self.params.scalingFactor, m=self.params.marginFactor).to(self.device)
 
     def __initialize_batch_variables(self):
 
@@ -226,6 +221,13 @@ class Trainer:
         if self.step % self.params.validate_every == 0:
             self.__validate()
 
+    def __updateTrainningVariables(self):
+
+        if self.stopping > 10:
+            self.__update_optimizer()
+        if self.epoch % 20 == 0 and self.loss=='AMSoftmax':
+            self.model.predictionLayer.increaseMarginFactor()
+
     def train(self):
 
         print('Start Training')
@@ -249,8 +251,8 @@ class Trainer:
                 print('--Best Model EER%%: %.2f' %(self.best_EER))
                 break
             
-            if self.stopping > 10:
-                self.__update_optimizer()
+            self.__updateTrainningVariables()
+
 
         print('Finished Training')
 
