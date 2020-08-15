@@ -46,9 +46,7 @@ class SpeakerClassifier(nn.Module):
         if parameters.loss == 'Softmax':
             self.predictionLayer = nn.Linear(parameters.embedding_size, parameters.num_spkrs)
         elif parameters.loss == 'AMSoftmax':
-            self.predictionLayer = nn.Linear(parameters.embedding_size, parameters.num_spkrs, bias=False)
-        elif parameters.loss == 'AMSoftmaxV2':
-            self.predictionLayer = AMSoftmaxV2(parameters.embedding_size, parameters.num_spkrs, s=parameters.scalingFactor, m = parameters.marginFactor)
+            self.predictionLayer = AMSoftmax(parameters.embedding_size, parameters.num_spkrs, s=parameters.scalingFactor, m = parameters.marginFactor)
 
         self.loss = parameters.loss
     
@@ -76,13 +74,6 @@ class SpeakerClassifier(nn.Module):
             prediction = self.predictionLayer(embedding3)
 
         elif self.loss == 'AMSoftmax':
-            embedding3 = self.preLayer(embedding2)
-            for W in self.predictionLayer.parameters():
-                W = F.normalize(W, dim=1)
-            embedding3 = F.normalize(embedding3, dim=1)
-            prediction = self.predictionLayer(embedding3)
-
-        elif self.loss == 'AMSoftmaxV2':
             embedding3 = self.preLayer(embedding2)
             prediction = self.predictionLayer(embedding3, label)
         
