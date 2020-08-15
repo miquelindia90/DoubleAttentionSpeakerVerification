@@ -305,7 +305,7 @@ if __name__=="__main__":
     parser.add_argument('--mask_prob', type=float, default=0.25, help='Masking Drop Probability. Only Used for Only Double MHA')
  
     # Losses 
-    parser.add_argument('--loss', type=str, choices=['Softmax', 'AMSoftmax','AMSoftmaxV2'], default='AMSoftmaxV2', help='type of loss function')
+    parser.add_argument('--loss', type=str, choices=['Softmax', 'AMSoftmax'], default='AMSoftmax', help='type of loss function')
     # AMSoftmax Config
     parser.add_argument('--scalingFactor', type=float, default=5.0, help='')
     parser.add_argument('--marginFactor', type=float, default=0.1, help='')
