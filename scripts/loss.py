@@ -1,4 +1,5 @@
 import torch
+import logging
 from torch import nn
 
 class AMSoftmax(nn.Module):
@@ -18,7 +19,9 @@ class AMSoftmax(nn.Module):
         self.W = torch.nn.Parameter(torch.randn(in_feats, n_classes), requires_grad=True)
         nn.init.xavier_normal_(self.W, gain=1)
 
-
+    def increaseMargingFactor(self):
+        self.m = min(self.m + 0.1, 0.5)
+        
     def forward(self, x, label=None):
         assert x.size()[0] == label.size()[0]
         assert x.size()[1] == self.in_feats
