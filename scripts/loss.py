@@ -1,42 +1,17 @@
 import torch
 from torch import nn
 
-
-
 class AMSoftmax(nn.Module):
-    '''
-    additive margin softmax as proposed in:
-    "Additive Margin Softmax for Face Verification"
-    by F. Wang et al.
-    https://github.com/cvqluu/Additive-Margin-Softmax-Loss-Pytorch/blob/master/AdMSLoss.py
-    '''
-    def __init__(self,s=30.0, m=0.4):
-        super(AMSoftmax, self).__init__()
-        self.s = s
-        self.m = m
-
-    def forward(self, wf, labels):
-        '''
-        input shape (batch,classes)
-        '''
-        assert len(wf) == len(labels)
-        assert torch.min(labels) >= 0
-        numerator = self.s * (torch.diagonal(wf.transpose(0, 1)[labels]) - self.m)
-        excl = torch.cat([torch.cat((wf[i, :y], wf[i, y+1:])).unsqueeze(0) for i, y in enumerate(labels)], dim=0)
-        denominator = torch.exp(numerator) + torch.sum(torch.exp(self.s * excl), dim=1)
-        L = numerator - torch.log(denominator)
-        return -torch.mean(L)
-
-
-class AMSoftmaxV2(nn.Module):
 
     '''
-    Alternative Implementation Extracted From
+    Additve Margin Softmax as proposed in:
+    https://arxiv.org/pdf/1801.05599.pdf
+    Implementation Extracted From
     https://github.com/clovaai/voxceleb_trainer/blob/master/loss/cosface.py
     '''
 
     def __init__(self, in_feats, n_classes, m=0.3, s=15):
-        super(AMSoftmaxV2, self).__init__()
+        super(AMSoftmax, self).__init__()
         self.m = m
         self.s = s
         self.in_feats = in_feats
