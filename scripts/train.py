@@ -225,7 +225,7 @@ class Trainer:
 
         if self.stopping > 10:
             self.__update_optimizer()
-        if self.epoch % 20 == 0 and self.loss=='AMSoftmax':
+        if self.epoch % 20 == 0 and self.param.loss=='AMSoftmax':
             self.model.predictionLayer.increaseMarginFactor()
 
     def train(self):
