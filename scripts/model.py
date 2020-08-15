@@ -3,6 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 from poolings import *
 from CNNs import *
+from loss import *
 
 class SpeakerClassifier(nn.Module):
 
@@ -45,11 +46,22 @@ class SpeakerClassifier(nn.Module):
         if parameters.loss == 'Softmax':
             self.predictionLayer = nn.Linear(parameters.embedding_size, parameters.num_spkrs)
         elif parameters.loss == 'AMSoftmax':
-            self.predictionLayer = nn.Linear(parameters.embedding_size, parameters.num_spkrs, bias=False)
-        
-        self.loss = parameters.loss
+            self.predictionLayer = AMSoftmax(parameters.embedding_size, parameters.num_spkrs, s=parameters.scalingFactor, m = parameters.marginFactor)
 
-    def forward(self, x):
+        self.loss = parameters.loss
+    
+    def getEmbedding(self,x):
+
+        encoder_output = self.front_end(x)
+
+        embedding0, alignment = self.PoolingLayer(encoder_output)
+        embedding1 = F.relu(self.fc1(embedding0))
+        embedding2 = self.b2(F.relu(self.fc2(embedding1)))
+    
+        return encoder_output, embedding2, None 
+
+
+    def forward(self, x, label=None):
 
         encoder_output = self.front_end(x)
 
@@ -63,10 +75,7 @@ class SpeakerClassifier(nn.Module):
 
         elif self.loss == 'AMSoftmax':
             embedding3 = self.preLayer(embedding2)
-            for W in self.predictionLayer.parameters():
-                W = F.normalize(W, dim=1)
-            embedding3 = F.normalize(embedding3, dim=1)
-            prediction = self.predictionLayer(embedding3)
-
+            prediction = self.predictionLayer(embedding3, label)
+        
         return encoder_output, embedding2, prediction
 

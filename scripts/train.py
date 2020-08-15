@@ -129,12 +129,7 @@ class Trainer:
             print('New Learning Rate: {}'.format(paramGroup['lr']))
     
     def __load_criterion(self):
-        if params.loss == 'Softmax':
             self.criterion = nn.CrossEntropyLoss()
-        elif params.loss=='AMSoftmax':
-            self.criterion = AMSoftmax(s=self.params.scalingFactor, m=self.params.marginFactor).to(self.device)
-        elif params.loss=='AMSoftmaxV2':
-            self.criterion = AMSoftmax(s=self.params.scalingFactor, m=self.params.marginFactor).to(self.device)
 
     def __initialize_batch_variables(self):
 
@@ -161,8 +156,8 @@ class Trainer:
 
             input1, input2 = self.__extractInputFromFeature(sline)
 
-            _, emb1, _ = self.net(input1)
-            _, emb2, _ = self.net(input2)
+            _, emb1, _ = self.net.module.getEmbedding(input1)
+            _, emb2, _ = self.net.module.getEmbedding(input2)
 
             dist = score(emb1, emb2)
             scores.append(dist.item())
@@ -226,6 +221,13 @@ class Trainer:
         if self.step % self.params.validate_every == 0:
             self.__validate()
 
+    def __updateTrainningVariables(self):
+
+        if self.stopping > 10:
+            self.__update_optimizer()
+        if self.epoch % 20 == 0 and self.loss=='AMSoftmax':
+            self.model.predictionLayer.increaseMarginFactor()
+
     def train(self):
 
         print('Start Training')
@@ -236,7 +238,7 @@ class Trainer:
                 self.train_batch += 1
                 input, label = input.float().to(self.device), label.long().to(self.device)
 
-                _, alignment, pred = self.net(input)
+                _, alignment, pred = self.net(input, label=label)
                 loss = self.criterion(pred, label)
                 loss.backward()
                 self.train_accuracy += Accuracy(pred, label)
@@ -249,8 +251,8 @@ class Trainer:
                 print('--Best Model EER%%: %.2f' %(self.best_EER))
                 break
             
-            if self.stopping > 10:
-                self.__update_optimizer()
+            self.__updateTrainningVariables()
+
 
         print('Finished Training')
 
@@ -291,7 +293,7 @@ if __name__=="__main__":
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
-    parser.add_argument('--out_dir', type=str, default='./models/model3', help='directory where data is saved')
+    parser.add_argument('--out_dir', type=str, default='./models/model6', help='directory where data is saved')
     parser.add_argument('--model_name', type=str, default='CNN', help='Model associated to the model builded')
     parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L'], help='Kind of Front-end Used')
     
@@ -301,14 +303,14 @@ if __name__=="__main__":
     parser.add_argument('--kernel_size', type=int, default=1024)
     parser.add_argument('--embedding_size', type=int, default=400)
     parser.add_argument('--heads_number', type=int, default=16)
-    parser.add_argument('--pooling_method', type=str, default='DoubleMHA', choices=['Attention', 'Statistical', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
-    parser.add_argument('--mask_prob', type=float, default=0.35, help='Masking Drop Probability. Only Used for Only Double MHA')
+    parser.add_argument('--pooling_method', type=str, default='Statistical', choices=['Attention', 'Statistical', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
+    parser.add_argument('--mask_prob', type=float, default=0.25, help='Masking Drop Probability. Only Used for Only Double MHA')
  
     # Losses 
     parser.add_argument('--loss', type=str, choices=['Softmax', 'AMSoftmax'], default='AMSoftmax', help='type of loss function')
     # AMSoftmax Config
-    parser.add_argument('--scalingFactor', type=float, default=30.0, help='')
-    parser.add_argument('--marginFactor', type=float, default=0.4, help='')
+    parser.add_argument('--scalingFactor', type=float, default=5.0, help='')
+    parser.add_argument('--marginFactor', type=float, default=0.1, help='')
 
     # Optimization 
     parser.add_argument('--optimizer', type=str, choices=['Adam', 'SGD', 'RMSprop'], default='Adam')
