@@ -225,8 +225,8 @@ class Trainer:
 
         if self.stopping > 10:
             self.__update_optimizer()
-        if self.epoch % 20 == 0 and self.param.loss=='AMSoftmax':
-            self.model.predictionLayer.increaseMarginFactor()
+        if self.epoch % 20 == 0 and self.params.loss=='AMSoftmax':
+            self.net.module.predictionLayer.increaseMarginFactor()
 
     def train(self):
 
@@ -309,8 +309,8 @@ if __name__=="__main__":
     # Losses 
     parser.add_argument('--loss', type=str, choices=['Softmax', 'AMSoftmax'], default='AMSoftmax', help='type of loss function')
     # AMSoftmax Config
-    parser.add_argument('--scalingFactor', type=float, default=5.0, help='')
-    parser.add_argument('--marginFactor', type=float, default=0.1, help='')
+    parser.add_argument('--scalingFactor', type=float, default=10.0, help='')
+    parser.add_argument('--marginFactor', type=float, default=0.0, help='')
 
     # Optimization 
     parser.add_argument('--optimizer', type=str, choices=['Adam', 'SGD', 'RMSprop'], default='Adam')
