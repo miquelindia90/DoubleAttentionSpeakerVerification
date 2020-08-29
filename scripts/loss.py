@@ -19,7 +19,7 @@ class AMSoftmax(nn.Module):
         self.W = torch.nn.Parameter(torch.randn(in_feats, n_classes), requires_grad=True)
         nn.init.xavier_normal_(self.W, gain=1)
 
-    def increaseMargingFactor(self):
+    def increaseMarginFactor(self):
         self.m = min(self.m + 0.1, 0.5)
         
     def forward(self, x, label=None):
