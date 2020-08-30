@@ -1,6 +1,6 @@
 import pickle
 import numpy as np
-from random import randint
+from random import randint, randrange
 from torch.utils import data
 import soundfile as sf
 
@@ -47,32 +47,28 @@ class Dataset(data.Dataset):
             std = np.where(std>0.01,std,1.0)
             return features/std
 
-    def __sampleSpectogramWindow(self, features, windowIndex):
+    def __sampleSpectogramWindow(self, features):
         file_size = features.shape[0]
-        index = randint(0, max(0,file_size-self.parameters.window_size*100-1)) if windowIndex ==-1 else windowIndex*50
-        a = np.array(range(min(file_size, int(self.parameters.window_size*100))))+index
+        windowSizeInFrames = self.parameters.window_size*100
+        index = randint(0, max(0,file_size-windowSizeInFrames-1))
+        a = np.array(range(min(file_size, int(windowSizeInFrames))))+index
         return features[a,:]
 
-    def __get_featureVector(self, spk_path, windowIndex):
+    def __getFeatureVector(self, utteranceName):
 
-        with open(spk_path + '.pickle','rb') as pickleFile:
+        with open(utteranceName + '.pickle','rb') as pickleFile:
             features = pickle.load(pickleFile)
-        windowedFeatures = self.__sampleSpectogramWindow(self.__normalize(np.transpose(features)), windowIndex)
+        windowedFeatures = self.__sampleSpectogramWindow(self.__normalize(np.transpose(features)))
         return windowedFeatures            
      
-    def __get_vector(self, spk_path, windowIndex):
-
-        return self.__get_featureVector(spk_path, windowIndex)
-
     def __len__(self):
         return self.num_samples
 
     def __getitem__(self, index):
         'Generates one sample of data'
         utteranceTuple = self.utterances[index].strip().split()
-        anchor = self.parameters.train_data_dir + '/' + utteranceTuple[0]
-        label = int(utteranceTuple[1])
-        windowIndex = int(utteranceTuple[2])
+        utteranceName = self.parameters.train_data_dir + '/' + utteranceTuple[0]
+        utteranceLabel = int(utteranceTuple[1])
         
-        return self.__get_vector(anchor, windowIndex), np.array(label)
+        return self.__getFeatureVector(utteranceName), np.array(utteranceLabel)
 
