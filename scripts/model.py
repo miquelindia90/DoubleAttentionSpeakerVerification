@@ -61,7 +61,7 @@ class SpeakerClassifier(nn.Module):
         return encoder_output, embedding2, None 
 
 
-    def forward(self, x, label=None):
+    def forward(self, x, label=None, step=0):
 
         encoder_output = self.front_end(x)
 
@@ -75,7 +75,7 @@ class SpeakerClassifier(nn.Module):
 
         elif self.loss == 'AMSoftmax':
             embedding3 = self.preLayer(embedding2)
-            prediction = self.predictionLayer(embedding3, label)
+            prediction = self.predictionLayer(embedding3, label, step)
         
         return encoder_output, embedding2, prediction
 

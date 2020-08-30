@@ -193,7 +193,11 @@ class Trainer:
                 IM = self.__extract_scores(impostors_in)
             # Compute EER
             EER = self.__calculate_EER(CL, IM)
-
+            
+       
+            if self.params.loss == 'AMSoftmax':     
+                annealedFactor = self.net.module.predictionLayer.getAnnealedFactor(self.step)
+                print('Annealed Factor is {}.'.format(annealedFactor))
             print('--Validation Epoch:{epoch: d}, Updates:{Num_Batch: d}, EER:{eer: 3.3f}, elapse:{elapse: 3.3f} min'.format(epoch=self.epoch, Num_Batch=self.step, eer=EER, elapse=(time.time()-valid_time)/60))
             # early stopping and save the best model
             if EER < self.best_EER:
@@ -225,8 +229,6 @@ class Trainer:
 
         if self.stopping > 10:
             self.__update_optimizer()
-        if self.epoch % 20 == 0 and self.params.loss=='AMSoftmax':
-            self.net.module.predictionLayer.increaseMarginFactor()
 
     def train(self):
 
@@ -235,15 +237,14 @@ class Trainer:
             self.net.train()
             self.__initialize_batch_variables()
             for input, label in self.training_generator:
-                self.train_batch += 1
                 input, label = input.float().to(self.device), label.long().to(self.device)
-
-                _, alignment, pred = self.net(input, label=label)
+                _, alignment, pred = self.net(input, label=label, step=self.step)
                 loss = self.criterion(pred, label)
                 loss.backward()
                 self.train_accuracy += Accuracy(pred, label)
                 self.train_loss += loss.item()
-
+                
+                self.train_batch += 1
                 if self.train_batch % self.params.gradientAccumulation == 0:
                     self.__update()
 
@@ -293,7 +294,7 @@ if __name__=="__main__":
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
-    parser.add_argument('--out_dir', type=str, default='./models/model6', help='directory where data is saved')
+    parser.add_argument('--out_dir', type=str, default='./models/model7', help='directory where data is saved')
     parser.add_argument('--model_name', type=str, default='CNN', help='Model associated to the model builded')
     parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L'], help='Kind of Front-end Used')
     
@@ -310,7 +311,7 @@ if __name__=="__main__":
     parser.add_argument('--loss', type=str, choices=['Softmax', 'AMSoftmax'], default='AMSoftmax', help='type of loss function')
     # AMSoftmax Config
     parser.add_argument('--scalingFactor', type=float, default=10.0, help='')
-    parser.add_argument('--marginFactor', type=float, default=0.0, help='')
+    parser.add_argument('--marginFactor', type=float, default=0.4, help='')
 
     # Optimization 
     parser.add_argument('--optimizer', type=str, choices=['Adam', 'SGD', 'RMSprop'], default='Adam')
