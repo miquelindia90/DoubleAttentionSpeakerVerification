@@ -24,7 +24,7 @@ class AMSoftmax(nn.Module):
         return 1/(1+alpha)
 
     def __getAlpha(self,step):
-        return max(0, 1000./(pow(1.+0.0001*float(step),5.)))        
+        return max(0, 1000./(pow(1.+0.0001*float(step),2.)))        
 
     def __getCombinedCosth(self, costh, costh_m, step):
 
