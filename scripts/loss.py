@@ -30,7 +30,7 @@ class AMSoftmax(nn.Module):
 
     def __getCombinedCosth(self, costh, costh_m, step):
 
-        alpha = self.__getAlpha(step)
+        alpha = self.__getAlpha(step) if self.annealing else 0.
         costh_combined = costh_m + alpha*costh
         return costh_combined/(1+alpha)
 
