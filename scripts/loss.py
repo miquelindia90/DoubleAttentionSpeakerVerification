@@ -49,7 +49,7 @@ class AMSoftmax(nn.Module):
         costh_m = costh - delt_costh
         costh_combined = self.__getCombinedCosth(costh, costh_m, step)
         costh_m_s = self.s * costh_combined
-        return costh_m_s 
+        return costh, costh_m_s 
  
 class FocalSoftmax(nn.Module):
     ''' 

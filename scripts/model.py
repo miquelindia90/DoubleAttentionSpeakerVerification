@@ -63,7 +63,7 @@ class SpeakerClassifier(nn.Module):
     def getEmbedding(self,x):
 
         encoder_output = self.front_end(x)
-        embedding0, alignment = self.PoolingLayer(encoder_output)
+        embedding0, alignment = self.poolingLayer(encoder_output)
         embedding1 = F.relu(self.fc1(embedding0))
         embedding2 = self.b2(F.relu(self.fc2(embedding1)))
     
@@ -80,11 +80,12 @@ class SpeakerClassifier(nn.Module):
                 
         if self.loss == 'Softmax':
             embedding3 = self.b3(F.relu(self.preLayer(embedding2)))
-            prediction = self.predictionLayer(embedding3)
+            lossPrediction = self.predictionLayer(embedding3)
+            prediction = lossPrediction
 
         elif self.loss == 'AMSoftmax':
             embedding3 = self.preLayer(embedding2)
-            prediction = self.predictionLayer(embedding3, label, step)
+            prediction, lossPrediction = self.predictionLayer(embedding3, label, step)
     
-        return encoder_output, embedding2, prediction
+        return prediction, embedding2, lossPrediction
 

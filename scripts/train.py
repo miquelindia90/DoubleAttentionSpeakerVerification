@@ -243,10 +243,10 @@ class Trainer:
             self.__initialize_batch_variables()
             for input, label in self.training_generator:
                 input, label = input.float().to(self.device), label.long().to(self.device)
-                _, alignment, pred = self.net(self.__randomSlice(input), label=label, step=self.step)
-                loss = self.criterion(pred, label)
+                accuracyPred, alignment, lossPred = self.net(self.__randomSlice(input), label=label, step=self.step)
+                loss = self.criterion(lossPred, label)
                 loss.backward()
-                self.train_accuracy += Accuracy(pred, label)
+                self.train_accuracy += Accuracy(accuracyPred, label)
                 self.train_loss += loss.item()
                 
                 self.train_batch += 1
@@ -299,7 +299,7 @@ if __name__=="__main__":
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
-    parser.add_argument('--out_dir', type=str, default='./models/model1', help='directory where data is saved')
+    parser.add_argument('--out_dir', type=str, default='./models/model3', help='directory where data is saved')
     parser.add_argument('--model_name', type=str, default='CNN', help='Model associated to the model builded')
     parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L'], help='Kind of Front-end Used')
     
@@ -309,8 +309,8 @@ if __name__=="__main__":
     parser.add_argument('--kernel_size', type=int, default=1024)
     parser.add_argument('--embedding_size', type=int, default=400)
     parser.add_argument('--heads_number', type=int, default=16)
-    parser.add_argument('--pooling_method', type=str, default='Statistical', choices=['Attention', 'Statistical', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
-    parser.add_argument('--mask_prob', type=float, default=0.25, help='Masking Drop Probability. Only Used for Only Double MHA')
+    parser.add_argument('--pooling_method', type=str, default='DoubleMHA', choices=['Attention', 'Statistical', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
+    parser.add_argument('--mask_prob', type=float, default=0.3, help='Masking Drop Probability. Only Used for Only Double MHA')
  
     # Losses 
     parser.add_argument('--loss', type=str, choices=['Softmax', 'AMSoftmax'], default='AMSoftmax', help='type of loss function')
