@@ -15,7 +15,7 @@ class SpeakerClassifier(nn.Module):
         self.__initFrontEnd(parameters)        
         self.__initPoolingLayers(parameters)
         self.__initFullyConnectedBlock(parameters)
-        self.__initLoss(parameters)       
+        self.predictionLayer = AMSoftmax(parameters.embedding_size, parameters.num_spkrs, s=parameters.scalingFactor, m=parameters.marginFactor, annealing = parameters.annealing)
  
 
     def __initFrontEnd(self, parameters):
@@ -52,14 +52,6 @@ class SpeakerClassifier(nn.Module):
         self.preLayer = nn.Linear(parameters.embedding_size, parameters.embedding_size)
         self.b3 = nn.BatchNorm1d(parameters.embedding_size)
         
-    def __initLoss(self,parameters):
-        
-        if parameters.loss == 'Softmax':
-            self.predictionLayer = nn.Linear(parameters.embedding_size, parameters.num_spkrs)
-        elif parameters.loss == 'AMSoftmax':
-            self.predictionLayer = AMSoftmax(parameters.embedding_size, parameters.num_spkrs, s=parameters.scalingFactor, m=parameters.marginFactor, annealing = parameters.annealing)
-        self.loss = parameters.loss
-
     def getEmbedding(self,x):
 
         encoder_output = self.front_end(x)
@@ -67,8 +59,7 @@ class SpeakerClassifier(nn.Module):
         embedding1 = F.relu(self.fc1(embedding0))
         embedding2 = self.b2(F.relu(self.fc2(embedding1)))
     
-        return encoder_output, embedding2, None 
-
+        return embedding2 
 
     def forward(self, x, label=None, step=0):
 
@@ -77,15 +68,8 @@ class SpeakerClassifier(nn.Module):
         embedding0, alignment = self.poolingLayer(encoder_output)
         embedding1 = F.relu(self.fc1(embedding0))
         embedding2 = self.b2(F.relu(self.fc2(embedding1)))
-                
-        if self.loss == 'Softmax':
-            embedding3 = self.b3(F.relu(self.preLayer(embedding2)))
-            lossPrediction = self.predictionLayer(embedding3)
-            prediction = lossPrediction
-
-        elif self.loss == 'AMSoftmax':
-            embedding3 = self.preLayer(embedding2)
-            prediction, lossPrediction = self.predictionLayer(embedding3, label, step)
+        embedding3 = self.preLayer(embedding2)
+        prediction, ouputTensor = self.predictionLayer(embedding3, label, step)
     
-        return prediction, embedding2, lossPrediction
+        return prediction, ouputTensor
 

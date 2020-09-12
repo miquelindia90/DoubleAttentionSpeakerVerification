@@ -157,8 +157,8 @@ class Trainer:
 
             input1, input2 = self.__extractInputFromFeature(sline)
 
-            _, emb1, _ = self.net.module.getEmbedding(input1)
-            _, emb2, _ = self.net.module.getEmbedding(input2)
+            emb1 = self.net.module.getEmbedding(input1)
+            emb2 = self.net.module.getEmbedding(input2)
 
             dist = score(emb1, emb2)
             scores.append(dist.item())
@@ -243,10 +243,10 @@ class Trainer:
             self.__initialize_batch_variables()
             for input, label in self.training_generator:
                 input, label = input.float().to(self.device), label.long().to(self.device)
-                accuracyPred, alignment, lossPred = self.net(self.__randomSlice(input), label=label, step=self.step)
-                loss = self.criterion(lossPred, label)
+                prediction, AMPrediction  = self.net(self.__randomSlice(input), label=label, step=self.step)
+                loss = self.criterion(AMPrediction, label)
                 loss.backward()
-                self.train_accuracy += Accuracy(accuracyPred, label)
+                self.train_accuracy += Accuracy(prediction, label)
                 self.train_loss += loss.item()
                 
                 self.train_batch += 1
@@ -280,12 +280,9 @@ def getModelName(params):
 
     model_name = params.model_name
 
-    model_name = model_name + '_{}'.format(params.front_end) + '_{}'.format(params.window_size) + '_{}batchSize'.format(params.batch_size*params.gradientAccumulation) + '_{}lr'.format(params.learning_rate) + '_{}weightDecay'.format(params.weight_decay) + '_{}kernel'.format(params.kernel_size) +'_{}embSize'.format(params.embedding_size) + '_{}'.format(params.loss)
-
-    if params.loss == 'AMSoftmax':
-        model_name += '_{}s'.format(params.scalingFactor) + '_{}m'.format(params.marginFactor) 
+    model_name = model_name + '_{}'.format(params.front_end) + '_{}'.format(params.window_size) + '_{}batchSize'.format(params.batch_size*params.gradientAccumulation) + '_{}lr'.format(params.learning_rate) + '_{}weightDecay'.format(params.weight_decay) + '_{}kernel'.format(params.kernel_size) +'_{}embSize'.format(params.embedding_size) + '_{}s'.format(params.scalingFactor) + '_{}m'.format(params.marginFactor) 
   
-    model_name = model_name + '_{}'.format(params.loss) + '_{}'.format(params.pooling_method) + '_{}'.format(params.heads_number)
+    model_name += '_{}'.format(params.pooling_method) + '_{}'.format(params.heads_number)
 
     return model_name
 
@@ -312,8 +309,6 @@ if __name__=="__main__":
     parser.add_argument('--pooling_method', type=str, default='DoubleMHA', choices=['Attention', 'Statistical', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
     parser.add_argument('--mask_prob', type=float, default=0.3, help='Masking Drop Probability. Only Used for Only Double MHA')
  
-    # Losses 
-    parser.add_argument('--loss', type=str, choices=['Softmax', 'AMSoftmax'], default='AMSoftmax', help='type of loss function')
     # AMSoftmax Config
     parser.add_argument('--scalingFactor', type=float, default=30.0, help='')
     parser.add_argument('--marginFactor', type=float, default=0.4, help='')
