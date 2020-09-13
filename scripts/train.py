@@ -195,10 +195,8 @@ class Trainer:
             # Compute EER
             EER = self.__calculate_EER(CL, IM)
             
-       
-            if self.params.loss == 'AMSoftmax':     
-                annealedFactor = self.net.module.predictionLayer.getAnnealedFactor(self.step)
-                print('Annealed Factor is {}.'.format(annealedFactor))
+            annealedFactor = self.net.module.predictionLayer.getAnnealedFactor(self.step)
+            print('Annealed Factor is {}.'.format(annealedFactor))
             print('--Validation Epoch:{epoch: d}, Updates:{Num_Batch: d}, EER:{eer: 3.3f}, elapse:{elapse: 3.3f} min'.format(epoch=self.epoch, Num_Batch=self.step, eer=EER, elapse=(time.time()-valid_time)/60))
             # early stopping and save the best model
             if EER < self.best_EER:
