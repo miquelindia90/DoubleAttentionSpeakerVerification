@@ -41,6 +41,22 @@ class Attention(nn.Module):
 
         return ct, attention_score
 
+class AttentionStatistical(nn.Module):
+
+    def __init__(self, embedding_size):
+
+        super(AttentionStatistical, self).__init__()
+        self.embedding_size = embedding_size
+        self.att=new_parameter(self.embedding_size,1)
+
+    def forward(self,ht):
+        attention_score = torch.matmul(ht, self.att).squeeze()
+        attention_score = F.softmax(attention_score, dim=-1).view(ht.size(0), ht.size(1),1)
+        weighted_ht = ht * attention_score
+        mean = torch.sum(weighted_ht,dim=1)
+        std = torch.sum((ht-mean.unsqueeze(1))*(ht-mean.unsqueeze(1)), dim=1)
+
+        return torch.cat((mean,std),dim=1), attention_score
 
 class HeadAttention(nn.Module):
 
