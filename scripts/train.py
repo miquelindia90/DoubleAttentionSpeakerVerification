@@ -14,9 +14,22 @@ sys.path.append('./scripts/')
 from data import *
 from model import SpeakerClassifier
 from loss import *
-from evaluate import *
 
-def score(emb1, emb2):
+
+def Score(SC, th, rate):
+    score_count = 0.0
+    for sc in SC:
+        if rate=='FAR':
+            if float(sc)>=float(th):
+                score_count+=1
+        elif rate=='FRR':
+            if float(sc)<float(th):
+                score_count+=1
+
+    return round(score_count*100/float(len(SC)),4)
+
+
+def scoreCosineDistance(emb1, emb2):
 
     dist = F.cosine_similarity(emb1,emb2, dim=-1, eps=1e-08)
     return dist
@@ -160,7 +173,7 @@ class Trainer:
             emb1 = self.net.module.getEmbedding(input1)
             emb2 = self.net.module.getEmbedding(input2)
 
-            dist = score(emb1, emb2)
+            dist = scoreCosineDistance(emb1, emb2)
             scores.append(dist.item())
 
         return scores
@@ -294,7 +307,7 @@ if __name__=="__main__":
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
-    parser.add_argument('--out_dir', type=str, default='./models/model3', help='directory where data is saved')
+    parser.add_argument('--out_dir', type=str, default='./models/model6', help='directory where data is saved')
     parser.add_argument('--model_name', type=str, default='CNN', help='Model associated to the model builded')
     parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L'], help='Kind of Front-end Used')
     
@@ -304,7 +317,7 @@ if __name__=="__main__":
     parser.add_argument('--kernel_size', type=int, default=1024)
     parser.add_argument('--embedding_size', type=int, default=400)
     parser.add_argument('--heads_number', type=int, default=16)
-    parser.add_argument('--pooling_method', type=str, default='DoubleMHA', choices=['Attention', 'Statistical', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
+    parser.add_argument('--pooling_method', type=str, default='Attention Statistical', choices=['Statistical', 'Attention', 'Attention Statistical', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
     parser.add_argument('--mask_prob', type=float, default=0.3, help='Masking Drop Probability. Only Used for Only Double MHA')
  
     # AMSoftmax Config
