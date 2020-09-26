@@ -42,9 +42,15 @@ class SpeakerClassifier(nn.Module):
             self.vector_size *= 2
         elif self.pooling_method == 'MHA':
             self.poolingLayer = MultiHeadAttention(self.vector_size, parameters.heads_number)
+        elif self.pooling_method == 'Statistical MHA':
+            self.poolingLayer = StatisticalMultiHeadAttention(self.vector_size, parameters.heads_number)
+            self.vector_size *= 2
         elif self.pooling_method == 'DoubleMHA':
             self.poolingLayer = DoubleMHA(self.vector_size, parameters.heads_number, mask_prob = parameters.mask_prob)
             self.vector_size = self.vector_size//parameters.heads_number
+        elif self.pooling_method == 'Statistical DoubleMHA':
+            self.poolingLayer = DoubleMHA(self.vector_size, parameters.heads_number, mask_prob = parameters.mask_prob, statistical=True)
+            self.vector_size = self.vector_size*2//parameters.heads_number
 
     def __initFullyConnectedBlock(self, parameters):
 

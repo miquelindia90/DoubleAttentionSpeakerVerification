@@ -125,51 +125,48 @@ class MultiHeadAttention(nn.Module):
         self.query = new_parameter(self.head_size, self.heads_number)
         self.aligmment = None
         
-    def getAlignments(self,x): 
-        batch_size = x.size(0)
-        key = x.view(batch_size*x.size(1), self.heads_number, self.head_size)
-        value = x.view(batch_size,-1,self.heads_number, self.head_size)
-        _, self.alignment = innerKeyValueAttention(self.query, key, value)
+    def getAlignments(self,ht): 
+        batch_size = ht.size(0)
+        key = ht.view(batch_size*ht.size(1), self.heads_number, self.head_size)
+        value = ht.view(batch_size,-1,self.heads_number, self.head_size)
+        headsContextVectors, self.alignment = innerKeyValueAttention(self.query, key, value)
         return self.alignment 
     
-    def forward(self, x):
-        batch_size = x.size(0)
-        key = x.view(batch_size*x.size(1), self.heads_number, self.head_size)
-        value = x.view(batch_size,-1,self.heads_number, self.head_size)
-        x, self.alignment = innerKeyValueAttention(self.query, key, value)
-        return x.view(x.size(0),-1), copy.copy(self.alignment)
+    def getHeadsContextVectors(self,ht):    
+        batch_size = ht.size(0)
+        key = ht.view(batch_size*ht.size(1), self.heads_number, self.head_size)
+        value = ht.view(batch_size,-1,self.heads_number, self.head_size)
+        headsContextVectors, self.alignment = innerKeyValueAttention(self.query, key, value)
+        return headsContextVectors
+
+    def forward(self, ht):
+        headsContextVectors = self.getHeadsContextVectors(self,ht)
+        return headsContextVectors.view(headsContextVectors.size(0),-1), copy.copy(self.alignment)
 
 
-class MultiHeadAttentionNoLastDense(nn.Module):
-    def __init__(self, encoder_size, heads_number):
-        super(MultiHeadAttentionNoLastDense, self).__init__()
-        self.encoder_size = encoder_size
-        assert self.encoder_size % heads_number == 0 # d_model
-        self.head_size = self.encoder_size // heads_number
-        self.heads_number = heads_number
-        self.query = new_parameter(self.head_size, self.heads_number)
-        self.aligmment = None
+class StatisticalMultiHeadAttention(nn.Module):
+    def __init__(self, encoder_size, heads_number, eps=0.0001):
+        super(StatisticalMultiHeadAttention, self).__init__()
+        self.multiHeadLayer = MultiHeadAttention(self, encoder_size, heads_number)
+        self.eps = eps
+        
+    def forward(self, ht):
+        if self.training:
+            ht = ht + torch.randn(ht.size()).cuda()*self.eps
+        headMeans = self.multiHeadLayer.getHeadsContextVectors(ht)
+        ht = ht.view(batch_size, ht.size(1), self.heads_number, self.head_size)
+        headStds = torch.sqrt(torch.sum((ht-headMeans.unsqueeze(1))*(ht-headMeans.unsqueeze(1)), dim=1)*(1/ht.size(1)))
+        headsContextVectors =  torch.cat((headMeans,headStds),dim=3)
+        return headsContextVectors.view(headContextVectors.size(0),-1), copy.copy(self.multiHeadLayer.alignment)
 
-    def getAlignments(self,x):
-        batch_size = x.size(0)
-        key = x.view(batch_size*x.size(1), self.heads_number, self.head_size)
-        value = x.view(batch_size,-1,self.heads_number, self.head_size)
-        _, self.alignment = innerKeyValueAttention(self.query, key, value)
-        return self.alignment
-
-    def forward(self, x):
-        batch_size = x.size(0)
-        key = x.view(batch_size*x.size(1), self.heads_number, self.head_size)
-        value = x.view(batch_size,-1,self.heads_number, self.head_size)
-        x, self.alignment = innerKeyValueAttention(self.query, key, value)
-        return x.view(x.size(0),-1), copy.copy(self.alignment)
 
 class DoubleMHA(nn.Module):
-    def __init__(self, encoder_size, heads_number, mask_prob=0.2):
+    def __init__(self, encoder_size, heads_number, mask_prob=0.2, statistical=False):
         super(DoubleMHA, self).__init__()
         self.heads_number = heads_number
         self.heads_size = encoder_size // heads_number
-        self.utteranceAttention = MultiHeadAttentionNoLastDense(encoder_size, heads_number)
+        self.utteranceAttention = StatisticalMultiHeadAttention(encoder_size, headsNumber) if statistical else MultiHeadAttention(encoder_size, heads_number)
+        encoder_size = encoder_size * 2 if statistical else encoder_size
         self.headsAttention = HeadAttention(encoder_size, heads_number, mask_prob=mask_prob, attentionSmoothing=False)
 
     def getAlignments(self, x):
@@ -182,4 +179,5 @@ class DoubleMHA(nn.Module):
         utteranceRepresentation, alignment = self.utteranceAttention(x)
         compressedRepresentation = self.headsAttention(utteranceRepresentation.view(utteranceRepresentation.size(0), self.heads_number, self.heads_size))[0]    
         return compressedRepresentation, alignment
+
 
