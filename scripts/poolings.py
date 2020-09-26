@@ -140,7 +140,7 @@ class MultiHeadAttention(nn.Module):
         return headsContextVectors
 
     def forward(self, ht):
-        headsContextVectors = self.getHeadsContextVectors(self,ht)
+        headsContextVectors = self.getHeadsContextVectors(ht)
         return headsContextVectors.view(headsContextVectors.size(0),-1), copy.copy(self.alignment)
 
 
