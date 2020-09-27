@@ -147,7 +147,7 @@ class MultiHeadAttention(nn.Module):
 class StatisticalMultiHeadAttention(nn.Module):
     def __init__(self, encoder_size, heads_number, eps=0.0001):
         super(StatisticalMultiHeadAttention, self).__init__()
-        self.multiHeadLayer = MultiHeadAttention(self, encoder_size, heads_number)
+        self.multiHeadLayer = MultiHeadAttention(encoder_size, heads_number)
         self.eps = eps
         
     def forward(self, ht):
