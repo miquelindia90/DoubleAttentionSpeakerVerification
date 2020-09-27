@@ -307,7 +307,7 @@ if __name__=="__main__":
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
-    parser.add_argument('--out_dir', type=str, default='./models/model12', help='directory where data is saved')
+    parser.add_argument('--out_dir', type=str, default='./models/model1', help='directory where data is saved')
     parser.add_argument('--model_name', type=str, default='CNN', help='Model associated to the model builded')
     parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L'], help='Kind of Front-end Used')
     
@@ -316,8 +316,8 @@ if __name__=="__main__":
     parser.add_argument('--normalization', type=str, default='cmn', choices=['cmn', 'cmvn'])
     parser.add_argument('--kernel_size', type=int, default=1024)
     parser.add_argument('--embedding_size', type=int, default=400)
-    parser.add_argument('--heads_number', type=int, default=16)
-    parser.add_argument('--pooling_method', type=str, default='DoubleMHA', choices=['Statistical', 'Attention', 'Attention Statistical', 'MHA', 'Statistical MHA', 'DoubleMHA', 'Statistical DoubleMHA'], help='Type of pooling methods')
+    parser.add_argument('--heads_number', type=int, default=32)
+    parser.add_argument('--pooling_method', type=str, default='Statistical', choices=['Statistical', 'Attention', 'Attention Statistical', 'MHA', 'Statistical MHA', 'DoubleMHA', 'Statistical DoubleMHA'], help='Type of pooling methods')
     parser.add_argument('--mask_prob', type=float, default=0.3, help='Masking Drop Probability. Only Used for Only Double MHA')
  
     # AMSoftmax Config
