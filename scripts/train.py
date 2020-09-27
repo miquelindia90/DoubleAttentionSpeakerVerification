@@ -219,7 +219,7 @@ class Trainer:
                 chkptsave(params, self.net, self.optimizer, self.epoch, self.step)
             else:
                 self.stopping += 1
-
+                print('Better Accuracy is: {}. {} epochs of no improvement'.format(self.best_EER, self.stopping))
             self.print_time = time.time()
             self.net.train()
 
@@ -239,7 +239,7 @@ class Trainer:
 
     def __updateTrainningVariables(self):
 
-        if self.stopping > 10:
+        if (self.stopping+1)% 15 ==0:
             self.__update_optimizer()
 
     def __randomSlice(self, inputTensor):
@@ -307,7 +307,7 @@ if __name__=="__main__":
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
-    parser.add_argument('--out_dir', type=str, default='./models/model1', help='directory where data is saved')
+    parser.add_argument('--out_dir', type=str, default='./models/model1b', help='directory where data is saved')
     parser.add_argument('--model_name', type=str, default='CNN', help='Model associated to the model builded')
     parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L'], help='Kind of Front-end Used')
     
@@ -332,7 +332,7 @@ if __name__=="__main__":
     parser.add_argument('--batch_size', type=int, default=64, help='number of sequences to train on in parallel')
     parser.add_argument('--gradientAccumulation', type=int, default=2)
     parser.add_argument('--max_epochs', type=int, default=1000000, help='number of full passes through the trainning data')
-    parser.add_argument('--early_stopping', type=int, default=15, help='-1 if not early stopping')
+    parser.add_argument('--early_stopping', type=int, default=25, help='-1 if not early stopping')
     parser.add_argument('--print_every', type = int, default = 1000)
     parser.add_argument('--requeue',action='store_true', help='restart from the last model for requeue on slurm')
     parser.add_argument('--validate_every', type = int, default = 10000)
