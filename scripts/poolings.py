@@ -148,16 +148,18 @@ class StatisticalMultiHeadAttention(nn.Module):
     def __init__(self, encoder_size, heads_number, eps=0.0001):
         super(StatisticalMultiHeadAttention, self).__init__()
         self.multiHeadLayer = MultiHeadAttention(encoder_size, heads_number)
+        self.encoder_size = encoder_size
+        self.heads_number = heads_number
         self.eps = eps
         
     def forward(self, ht):
         if self.training:
             ht = ht + torch.randn(ht.size()).cuda()*self.eps
         headMeans = self.multiHeadLayer.getHeadsContextVectors(ht)
-        ht = ht.view(batch_size, ht.size(1), self.heads_number, self.head_size)
+        ht = ht.view(ht.size(0), ht.size(1), self.heads_number, self.encoder_size//self.heads_number)
         headStds = torch.sqrt(torch.sum((ht-headMeans.unsqueeze(1))*(ht-headMeans.unsqueeze(1)), dim=1)*(1/ht.size(1)))
-        headsContextVectors =  torch.cat((headMeans,headStds),dim=3)
-        return headsContextVectors.view(headContextVectors.size(0),-1), copy.copy(self.multiHeadLayer.alignment)
+        headsContextVectors =  torch.cat((headMeans,headStds),dim=-1)
+        return headsContextVectors.view(headsContextVectors.size(0),-1), copy.copy(self.multiHeadLayer.alignment)
 
 
 class DoubleMHA(nn.Module):
