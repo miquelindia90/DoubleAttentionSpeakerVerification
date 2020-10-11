@@ -166,9 +166,9 @@ class DoubleMHA(nn.Module):
     def __init__(self, encoder_size, heads_number, mask_prob=0.2, statistical=False):
         super(DoubleMHA, self).__init__()
         self.heads_number = heads_number
-        self.heads_size = encoder_size // heads_number
-        self.utteranceAttention = StatisticalMultiHeadAttention(encoder_size, headsNumber) if statistical else MultiHeadAttention(encoder_size, heads_number)
+        self.utteranceAttention = StatisticalMultiHeadAttention(encoder_size, heads_number) if statistical else MultiHeadAttention(encoder_size, heads_number)
         encoder_size = encoder_size * 2 if statistical else encoder_size
+        self.heads_size = encoder_size // heads_number
         self.headsAttention = HeadAttention(encoder_size, heads_number, mask_prob=mask_prob, attentionSmoothing=False)
 
     def getAlignments(self, x):
