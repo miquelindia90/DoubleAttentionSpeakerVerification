@@ -13,13 +13,11 @@ def new_parameter(*size):
 
 class StatisticalPooling(nn.Module):
 
-    def __init__(self, eps=0.0001):
+    def __init__(self):
         super(StatisticalPooling, self).__init__()
-        self.eps = eps
+    
     def forward(self, ht):
 
-        if self.training:
-            ht = ht + torch.randn(ht.size()).cuda()*self.eps
         mean = torch.mean(ht, dim=1)
         std = torch.std(ht, dim=1)
         return torch.cat((mean, std), dim=1), None
@@ -36,29 +34,23 @@ class Attention(nn.Module):
     def forward(self,ht):
         attention_score = torch.matmul(ht, self.att).squeeze()
         attention_score = F.softmax(attention_score, dim=-1).view(ht.size(0), ht.size(1),1)
-        weighted_ht = ht * attention_score
-        ct = torch.sum(weighted_ht,dim=1)
+        ct = torch.sum(ht * attention_score,dim=1)
 
         return ct, attention_score
 
 class AttentionStatistical(nn.Module):
 
-    def __init__(self, embedding_size, eps=0.0001):
+    def __init__(self, embedding_size):
         super(AttentionStatistical, self).__init__()
         self.embedding_size = embedding_size
         self.att=new_parameter(self.embedding_size,1)
-        self.eps = eps
 
     def forward(self,ht):
         
-        if self.training:
-            ht = ht + torch.randn(ht.size()).cuda()*self.eps
         attention_score = torch.matmul(ht, self.att).squeeze()
         attention_score = F.softmax(attention_score, dim=-1).view(ht.size(0), ht.size(1),1)
-        weighted_ht = ht * attention_score
-        mean = torch.sum(weighted_ht,dim=1)
-        std = torch.sqrt(torch.sum((ht-mean.unsqueeze(1))*(ht-mean.unsqueeze(1)), dim=1)*(1/ht.size(1)))
-
+        mean = torch.sum(ht * attention_score,dim=1)
+        std = torch.sqrt((torch.sum((ht**2) * attention_score, dim=1) - mean**2).clamp(min=1e-5))
         return torch.cat((mean,std),dim=1), attention_score
 
 class HeadAttention(nn.Module):
@@ -145,19 +137,16 @@ class MultiHeadAttention(nn.Module):
 
 
 class StatisticalMultiHeadAttention(nn.Module):
-    def __init__(self, encoder_size, heads_number, eps=0.0001):
+    def __init__(self, encoder_size, heads_number):
         super(StatisticalMultiHeadAttention, self).__init__()
         self.multiHeadLayer = MultiHeadAttention(encoder_size, heads_number)
         self.encoder_size = encoder_size
         self.heads_number = heads_number
-        self.eps = eps
         
     def forward(self, ht):
-        if self.training:
-            ht = ht + torch.randn(ht.size()).cuda()*self.eps
         headMeans = self.multiHeadLayer.getHeadsContextVectors(ht)
         ht = ht.view(ht.size(0), ht.size(1), self.heads_number, self.encoder_size//self.heads_number)
-        headStds = torch.sqrt(torch.sum((ht-headMeans.unsqueeze(1))*(ht-headMeans.unsqueeze(1)), dim=1)*(1/ht.size(1)))
+        headStds = torch.sqrt((torch.sum((ht**2) * self.multiHeadLayer.alignment.unsqueeze(-1), dim=1) - headMeans**2).clamp(min=1e-5))
         headsContextVectors =  torch.cat((headMeans,headStds),dim=-1)
         return headsContextVectors.view(headsContextVectors.size(0),-1), copy.copy(self.multiHeadLayer.alignment)
 
