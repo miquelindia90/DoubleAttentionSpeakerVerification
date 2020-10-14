@@ -19,7 +19,7 @@ class StatisticalPooling(nn.Module):
     def forward(self, ht):
 
         mean = torch.mean(ht, dim=1)
-        std = torch.std(ht, dim=1)
+        std = torch.sqrt((torch.mean(ht**2, dim=1) - mean**2).clamp(min=1e-5))
         return torch.cat((mean, std), dim=1), None
 
 
