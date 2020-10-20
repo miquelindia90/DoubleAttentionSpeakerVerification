@@ -254,7 +254,8 @@ class Trainer:
             self.__initialize_batch_variables()
             for input, label in self.training_generator:
                 input, label = input.float().to(self.device), label.long().to(self.device)
-                prediction, AMPrediction  = self.net(self.__randomSlice(input), label=label, step=self.step)
+                input = self.__randomSlice(input) if self.params.randomSlicing else input 
+                prediction, AMPrediction  = self.net(input, label=label, step=self.step)
                 loss = self.criterion(AMPrediction, label)
                 loss.backward()
                 self.train_accuracy += Accuracy(prediction, label)
@@ -303,7 +304,7 @@ if __name__=="__main__":
    
     parser.add_argument('--train_data_dir', type=str, default='/scratch/speaker_databases/', help='data directory.')
     parser.add_argument('--valid_data_dir', type=str, default='/scratch/speaker_databases/VoxCeleb-1/wav', help='data directory.')
-    parser.add_argument('--train_labels_path', type = str, default = 'labels/Vox2.ndx')
+    parser.add_argument('--train_labels_path', type = str, default = 'labels/all.ndx')
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
@@ -313,6 +314,7 @@ if __name__=="__main__":
     
     # Network Parameteres
     parser.add_argument('--window_size', type=float, default=3.5, help='number of seconds per window')
+    parser.add_argument('--randomSlicing',action='store_true')
     parser.add_argument('--normalization', type=str, default='cmn', choices=['cmn', 'cmvn'])
     parser.add_argument('--kernel_size', type=int, default=1024)
     parser.add_argument('--embedding_size', type=int, default=400)
