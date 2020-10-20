@@ -150,7 +150,6 @@ class StatisticalMultiHeadAttention(nn.Module):
         headsContextVectors =  torch.cat((headMeans,headStds),dim=-1)
         return headsContextVectors.view(headsContextVectors.size(0),-1), copy.copy(self.multiHeadLayer.alignment)
 
-
 class DoubleMHA(nn.Module):
     def __init__(self, encoder_size, heads_number, mask_prob=0.2, statistical=False):
         super(DoubleMHA, self).__init__()
@@ -171,4 +170,25 @@ class DoubleMHA(nn.Module):
         compressedRepresentation = self.headsAttention(utteranceRepresentation.view(utteranceRepresentation.size(0), self.heads_number, self.heads_size))[0]    
         return compressedRepresentation, alignment
 
+class CombinedAttentions1(nn.Module):
+    def __init__(self, encoder_size, heads_number, mask_prob=0.2):
+        super(CombinedAttentions1, self).__init__()
+        self.attention = Attention(encoder_size)
+        self.doubleMHA = DoubleMHA(encoder_size, heads_number, mask_prob=0.2)
+
+    def forward(self, x):
+        embedding, alignment = self.attention(x)
+        doubleMHAEmbedding, doubleMHAAlignment = self.doubleMHA(x)
+        return torch.cat((embedding, doubleMHAEmbedding), dim=1), (alignment, doubleMHAAlignment)
+
+class CombinedAttentions2(nn.Module):
+    def __init__(self, encoder_size, heads_number, mask_prob=0.2):
+        super(CombinedAttentions2, self).__init__()
+        self.attention = Attention(encoder_size)
+        self.MHA = MHA(encoder_size, heads_number)
+
+    def forward(self, x):
+        embedding, alignment = self.attention(x)
+        MHAEmbedding, MHAAlignment = self.MHA(x)
+        return torch.cat((embedding, MHAEmbedding), dim=1), (alignment, MHAAlignment)
 
