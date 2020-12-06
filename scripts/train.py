@@ -319,7 +319,7 @@ if __name__=="__main__":
     parser.add_argument('--kernel_size', type=int, default=1024)
     parser.add_argument('--embedding_size', type=int, default=400)
     parser.add_argument('--heads_number', type=int, default=32)
-    parser.add_argument('--pooling_method', type=str, default='Statistical', choices=['Statistical', 'Attention', 'Attention Statistical', 'MHA', 'Statistical MHA', 'DoubleMHA', 'Statistical DoubleMHA'], help='Type of pooling methods')
+    parser.add_argument('--pooling_method', type=str, default='Statistical', choices=['Attention', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
     parser.add_argument('--mask_prob', type=float, default=0.3, help='Masking Drop Probability. Only Used for Only Double MHA')
  
     # AMSoftmax Config
