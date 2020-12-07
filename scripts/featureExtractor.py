@@ -3,6 +3,7 @@ import soundfile as sf
 import sys
 import pickle
 import librosa
+import argparse
 
 def mfsc(y, sfr, window_size=0.025, window_stride=0.010, window='hamming', n_mels=80, preemCoef=0.97):
     win_length = int(sfr * window_size)
@@ -31,16 +32,23 @@ def extractFeatures(audioPath):
     features = mfsc(y, sfreq)    
     return normalize(np.transpose(features))
 
-if __name__=='__main__':
+def main(params):
 
-    with open(sys.argv[1],'r') as  filesFile:
+    with open(params.audioFilesList,'r') as  filesFile:
         for featureFile in filesFile:
             print(featureFile[:-1])
-            y, sfreq = sf.read('{}.wav'.format(featureFile[:-1])) 
+            y, sfreq = sf.read('{}'.format(featureFile[:-1])) 
             mf = mfsc(y, sfreq)
-            with open('{}.pickle'.format(featureFile[:-1]), 'wb') as handle:
+            with open('{}.pickle'.format(featureFile[:-5]), 'wb') as handle:
                 pickle.dump(mf,handle)
-                
+
+if __name__=='__main__':
+
+
+    parser = argparse.ArgumentParser(description='Extract Features. Looks for .wav files and extract Features')
+    parser.add_argument('--audioFilesList', '-i', type=str, required=True, default='', help='Wav Files List.')
+    params=parser.parse_args()
+    main(params) 
 
 
 
