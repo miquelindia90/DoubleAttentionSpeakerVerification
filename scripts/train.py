@@ -304,7 +304,7 @@ if __name__=="__main__":
    
     parser.add_argument('--train_data_dir', type=str, default='/scratch/speaker_databases/', help='data directory.')
     parser.add_argument('--valid_data_dir', type=str, default='/scratch/speaker_databases/VoxCeleb-1/wav', help='data directory.')
-    parser.add_argument('--train_labels_path', type = str, default = 'labels/all.ndx')
+    parser.add_argument('--train_labels_path', type = str, default = 'labels/Vox2.ndx')
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
@@ -319,7 +319,7 @@ if __name__=="__main__":
     parser.add_argument('--kernel_size', type=int, default=1024)
     parser.add_argument('--embedding_size', type=int, default=400)
     parser.add_argument('--heads_number', type=int, default=32)
-    parser.add_argument('--pooling_method', type=str, default='MHA', choices=['Attention', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
+    parser.add_argument('--pooling_method', type=str, default='Attention', choices=['Attention', 'MHA', 'DoubleMHA'], help='Type of pooling methods')
     parser.add_argument('--mask_prob', type=float, default=0.3, help='Masking Drop Probability. Only Used for Only Double MHA')
  
     # AMSoftmax Config
