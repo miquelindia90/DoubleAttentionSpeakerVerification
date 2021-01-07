@@ -22,7 +22,7 @@ This repository code shoud allow you to train a speker embedding extractor accor
 
 ### Feature Extraction
 
-You can find in `scripts/featureExtractor.py` several functions that extracts and normalize the Log Mel Spectogram features. If you run want to the whole feature extraction over a set of audios you can run the following command:
+You can find in `scripts/featureExtractor.py` several functions that extracts and normalize the Log Mel Spectogram features. If you want to run the whole feature extraction over a set of audios you can run the following command:
 
 ```bash
 pythoh scripts/featureExtractor -i files.lst
@@ -30,12 +30,13 @@ pythoh scripts/featureExtractor -i files.lst
 
 where `files.lst` contains the audio paths wanted to parameterize. Each row of the file must contain an audio path without the file format extension (we assume you will be using .wav). Example:
 
+<pre>
 audiosPath/audio1
 audiosPath/audio2
 ...
-audiosPath/audio2
+audiosPath/audioN</pre>
 
-This script will extract a feautre for each audio file and it will store them in a pickle in the same audio path.
+This script will extract a feature for each audio file and it will store it in a pickle in the same audio path.
 
 ### Network Training
 
