@@ -40,9 +40,9 @@ This script will extract a feature for each audio file and it will store it in a
 
 ### Network Training
 
-Once you have extracted the features from all the audios wanted to be used, It is needed to prepare some path files for the training step. The proposed models are trained as speaker classifiers, hence a classification-based loss and an accuracy metric will be used to monitorize the training progress. However in the validaition step, an EER estimation is used to validate the network progresss. The motivation behind this is that best accuracy models do not always have the best inter/intra speaker variability. Therefore we prefer to  use directly a task based metric to validate the model instead of using a classification one. Two different kind of path files will then be needed for the training/validation procedures:
+Once you have extracted the features from all the audios wanted to be used, It is needed to prepare some path files for the training step. The proposed models are trained as speaker classifiers, hence a classification-based loss and an accuracy metric will be used to monitorize the training progress. However in the validaition step, an EER estimation is used to validate the network progress. The motivation behind this is that best accuracy models do not always have the best inter/intra speaker variability. Therefore we prefer to  use directly a task based metric to validate the model instead of using a classification one. Two different kind of path files will then be needed for the training/validation procedures:
 
-Train Labels File (`train_labels_path`): This file must have three columns separated by a blank space. The first column must contain the audio utterance paths, the second column must contain the speaker labels and the third one must be filled with None. It is assumed that the labels correspond to the output labels ids of the network. Hence if you are working with a N speakers database, the speaker labels values should be in the 0 to N-1 range.
+Train Labels File (`train_labels_path`): This file must have three columns separated by a blank space. The first column must contain the audio utterance paths, the second column must contain the speaker labels and the third one must be filled with None. It is assumed that the labels correspond to the output network labels. Hence if you are working with a N speakers database, the speaker labels values should be in the 0 to N-1 range.
 
 File Example:
 
@@ -50,13 +50,13 @@ File Example:
 audiosPath/speaker1/audio1 0 None
 audiosPath/speaker1/audio2 0 None
 ...
-audiosPath/speakerN/audio4 N-1</pre>
+audiosPath/speakerN/audio4 N-1 None</pre>
 
 We have also added a `--train_data_dir` path argument. The dataloader will then look for the features on the `--train_data_dir` + `audiosPath/speakeri/audioj` paths.
 
 Valid Labels File:
 
-For the validation step, it will be needed a tuple of client/impostors trial files. Client trials (`valid_clients`) file must contain pair of audio utterance from same spakers and the impostors trials file (`valid_impostors`) must contain utterance pairs but from different speakers. Each pair path must be separated with a blank space:
+For the validation step, it will be needed a tuple of client/impostors trial files. Client trials (`valid_clients`) file must contain pairs of audio utterances from same speakers and the impostors trials (`valid_impostors`)cile  must also contain audio utterance pairs but from different speakers. Each pair path must be separated with a blank space:
 
 File Example (Clients):
 
