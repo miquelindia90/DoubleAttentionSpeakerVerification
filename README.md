@@ -69,5 +69,15 @@ audiosPath/speakerN/audio4 audiosPath/speakerN/audio3</pre>
 
 Similar to the train file, we have also added a `--valid_data_dir` argument.
 
+Once you have all this data files ready, you can launch a training with the following command:
+
+
+```bash
+python scripts/train.py
+```
+
+With this script you will launch a training with the default setup defined in `scripts/train.py`. The model will be trained following the methods and procedures described in the paper. The best models found will be saved in the `--out_dir` directory. You will find there a `.json` file with the training/model configuraiton and the several checkpoint `.pt` files which store model weghts, optimizer state values, etc. The best saved model will then correspond to the last saved, which can be identificed with the largest step number.
+
+ 
 ### Speaker Embedding Extraction
 
