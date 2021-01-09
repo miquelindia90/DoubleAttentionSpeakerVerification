@@ -18,7 +18,7 @@ more details about its installation in [Soundfile](https://pysoundfile.readthedo
 
 ## Usage
 
-This repository shoud allow you to train a speker embedding extractor according to the setup described in the paper. This speaker embedding extractor is based on a VGG-based classifier which identifies speaker identities given variable length audio utterances. The network used for this work uses log mel-spectogram features as input. Hence, we have added here the instructions to reproduce the feature extraction, the network training and the speaker embedding extraction step. Feel free to ask any doubt via git-hub issues, [twitter](https://twitter.com/mikiindia) or mail(miquel.angel.india@upc.edu).
+This repository shoud allow you to train a speaker embedding extractor according to the setup described in the paper. This speaker embedding extractor is based on a VGG-based classifier which identifies speaker identities given variable length audio utterances. The network used for this work uses log mel-spectogram features as input. Hence, we have added here the instructions to reproduce the feature extraction, the network training and the speaker embedding extraction step. Feel free to ask any doubt via git-hub issues, [twitter](https://twitter.com/mikiindia) or mail(miquel.angel.india@upc.edu).
 
 ### Feature Extraction
 
@@ -42,7 +42,9 @@ This script will extract a feature for each audio file and it will store it in a
 
 Once you have extracted the features from all the audios wanted to be used, It is needed to prepare some path files for the training step. The proposed models are trained as speaker classifiers, hence a classification-based loss and an accuracy metric will be used to monitorize the training progress. However in the validation step, an EER estimation is used to validate the network progress. The motivation behind this is that best accuracy models do not always have the best inter/intra speaker variability. Therefore we prefer to  use directly a task based metric to validate the model instead of using a classification one. Two different kind of path files will then be needed for the training/validation procedures:
 
-Train Labels File (`train_labels_path`): This file must have three columns separated by a blank space. The first column must contain the audio utterance paths, the second column must contain the speaker labels and the third one must be filled with -1. It is assumed that the labels correspond to the output network labels. Hence if you are working with a N speakers database, the speaker labels values should be in the 0 to N-1 range.
+Train Labels File (`train_labels_path`):
+
+This file must have three columns separated by a blank space. The first column must contain the audio utterance paths, the second column must contain the speaker labels and the third one must be filled with -1. It is assumed that the labels correspond to the output network labels. Hence if you are working with a N speakers database, the speaker labels values should be in the 0 to N-1 range.
 
 File Example:
 
@@ -81,7 +83,7 @@ With this script you will launch the model training with the default setup defin
  
 ### Speaker Embedding Extraction
 
-Given a trained model, this one can be used to extract a speaker embedding from a variable-length audio. We have added a script example to show how to use the models to extract speaker embeddings. This can be then used to extract similiary scores between audios computing the cosine distance between their embeddings. You can use the following command:
+Given a trained model, this one can be used to extract a speaker embedding from a variable-length audio. We have added a script example to show how to use the models to extract speaker embeddings. This can be then used to extract similiary scores between audios computing the cosine distance between their embeddings. Run the following command:
 
 ```bash
 python scripts/getEmbeddingExample.py --audioPath <path_to_audio.wav> --modelConfig <path_to_config_file.pkl> --modelCheckpoint <path_to_checkpoint_file.chkpt>
