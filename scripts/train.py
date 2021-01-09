@@ -149,6 +149,12 @@ class Trainer:
             EER = 50.00
         return EER
 
+    def __getAnnealedFactor(self):
+        if torch.cuda.device_count() > 1:
+            return self.net.module.predictionLayer.getAnnealedFactor(self.step)
+        else:
+            return self.net.predictionLayer.getAnnealedFactor(self.step)
+
     def __validate(self):
 
         with torch.no_grad():
@@ -162,7 +168,7 @@ class Trainer:
             # Compute EER
             EER = self.__calculate_EER(CL, IM)
             
-            annealedFactor = self.net.module.predictionLayer.getAnnealedFactor(self.step)
+            annealedFactor = self.__getAnnealedFactor()
             print('Annealed Factor is {}.'.format(annealedFactor))
             print('--Validation Epoch:{epoch: d}, Updates:{Num_Batch: d}, EER:{eer: 3.3f}, elapse:{elapse: 3.3f} min'.format(epoch=self.epoch, Num_Batch=self.step, eer=EER, elapse=(time.time()-valid_time)/60))
             # early stopping and save the best model
