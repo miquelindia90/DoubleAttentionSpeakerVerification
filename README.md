@@ -18,11 +18,11 @@ more details about its installation in [Soundfile](https://pysoundfile.readthedo
 
 ## Usage
 
-This repository shoud allow you to train a speker embedding extractor according to the setup described in the paper. This speaker embedding extractor is based on a VGG-based classifier which identifies speaker identities given variable length audio utterances. The network used for this work uses Log Mel-Spectogram features as input. Hence, we have added here the instructions to reproduce the feature extraction, the network training and the speaker embedding extraction step. Feel free to ask any doubt via git-hub issues, [twitter](https://twitter.com/mikiindia) or mail(miquel.angel.india@upc.edu).
+This repository shoud allow you to train a speker embedding extractor according to the setup described in the paper. This speaker embedding extractor is based on a VGG-based classifier which identifies speaker identities given variable length audio utterances. The network used for this work uses log mel-spectogram features as input. Hence, we have added here the instructions to reproduce the feature extraction, the network training and the speaker embedding extraction step. Feel free to ask any doubt via git-hub issues, [twitter](https://twitter.com/mikiindia) or mail(miquel.angel.india@upc.edu).
 
 ### Feature Extraction
 
-You can find in `scripts/featureExtractor.py` several functions which extract and normalize the Log Mel Spectogram features. If you want to run the whole feature extraction over a set of audios you can run the following command:
+You can find in `scripts/featureExtractor.py` several functions which extract and normalize the log mel-spectogram descriptors. If you want to run the whole feature extraction over a set of audios you can run the following command:
 
 ```bash
 python scripts/featureExtractor -i files.lst
