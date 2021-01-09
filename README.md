@@ -76,8 +76,15 @@ Once you have all this data files ready, you can launch a training with the foll
 python scripts/train.py
 ```
 
-With this script you will launch the model training with the default setup defined in `scripts/train.py`. The model will be trained following the methods and procedures described in the paper. The best models found will be saved in the `--out_dir` directory. You will find there a `.json` file with the training/model configuraiton and several checkpoint `.pt` files which store model weghts, optimizer state values, etc. The best saved model corresponds to the last saved checkpoint.
+With this script you will launch the model training with the default setup defined in `scripts/train.py`. The model will be trained following the methods and procedures described in the paper. The best models found will be saved in the `--out_dir` directory. You will find there a `.pkl` file with the training/model configuraiton and several checkpoint `.pt` files which store model weghts, optimizer state values, etc. The best saved model corresponds to the last saved checkpoint.
 
  
 ### Speaker Embedding Extraction
+
+Given a trained model, this one can be used to extract a speaker embedding from a variable-length audio. We have added a script example to show how to use the models to extract speaker embeddings. This can be then used to extract similiary scores between audios computing the cosine distance between their embeddings. You can use the following command:
+
+```bash
+python scripts/getEmbeddingExample.py --audioPath <path_to_audio.wav> --modelConfig <path_to_config_file.pkl> --modelCheckpoint <path_to_checkpoint_file.chkpt>
+```
+This script will load the model, and will extract and print the embedding given the input audio.
 
