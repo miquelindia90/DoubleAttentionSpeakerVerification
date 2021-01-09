@@ -122,8 +122,10 @@ class Trainer:
 
             input1, input2 = self.__extractInputFromFeature(sline)
 
-            emb1 = self.net.module.getEmbedding(input1)
-            emb2 = self.net.module.getEmbedding(input2)
+            if torch.cuda.device_count() > 1:
+                emb1, emb2 = self.net.module.getEmbedding(input1), self.net.module.getEmbedding(input2)
+            else:
+                emb1, emb2 = self.net.getEmbedding(input1), self.net.getEmbedding(input2)
 
             dist = scoreCosineDistance(emb1, emb2)
             scores.append(dist.item())
