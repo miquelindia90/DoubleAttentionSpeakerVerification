@@ -39,6 +39,9 @@ class SpeakerClassifier(nn.Module):
         elif self.pooling_method == 'DoubleMHA':
             self.poolingLayer = DoubleMHA(self.vector_size, parameters.heads_number, mask_prob = parameters.mask_prob)
             self.vector_size = self.vector_size//parameters.heads_number
+        elif self.pooling_method == 'ACS':
+            self.poolingLayer = ACS(self.vector_size, parameters.heads_number, parameters.kernel_size)
+            self.vector_size = self.vector_size*parameters.heads_number//parameters.kernel_size
 
     def __initFullyConnectedBlock(self, parameters):
 

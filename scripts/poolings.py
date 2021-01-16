@@ -110,11 +110,10 @@ class MultiHeadAttention(nn.Module):
 
 
 class DoubleMHA(nn.Module):
-    def __init__(self, encoder_size, heads_number, mask_prob=0.2, statistical=False):
+    def __init__(self, encoder_size, heads_number, mask_prob=0.2):
         super(DoubleMHA, self).__init__()
         self.heads_number = heads_number
-        self.utteranceAttention = StatisticalMultiHeadAttention(encoder_size, heads_number) if statistical else MultiHeadAttention(encoder_size, heads_number)
-        encoder_size = encoder_size * 2 if statistical else encoder_size
+        self.utteranceAttention = MultiHeadAttention(encoder_size, heads_number)
         self.heads_size = encoder_size // heads_number
         self.headsAttention = HeadAttention(encoder_size, heads_number, mask_prob=mask_prob, attentionSmoothing=False)
 
@@ -128,4 +127,25 @@ class DoubleMHA(nn.Module):
         utteranceRepresentation, alignment = self.utteranceAttention(x)
         compressedRepresentation = self.headsAttention(utteranceRepresentation.view(utteranceRepresentation.size(0), self.heads_number, self.heads_size))[0]    
         return compressedRepresentation, alignment
+
+class ACS(nn.Module):
+
+    def __init__(self, encoder_size, heads_number, kernel_size, mask_prob=0.5):
+        super(ACS, self).__init__()
+        self.heads_number = heads_number
+        self.kernel_size = kernel_size
+        self.utteranceAttention = MultiHeadAttention(encoder_size, kernel_size)
+        self.heads_size = encoder_size // kernel_size
+        self.headsAttentionList = nn.ModuleList()
+        for _ in range(self.heads_number):
+            self.headsAttentionList.append(HeadAttention(encoder_size, kernel_size, mask_prob=mask_prob, attentionSmoothing=False))
+
+    def forward(self, x):
+        utteranceRepresentation, alignment = self.utteranceAttention(x)
+        compressedRepresentation = self.headsAttentionList[0](utteranceRepresentation.view(utteranceRepresentation.size(0), self.kernel_size, self.heads_size))[0]
+        for headIndex in range(1, self.heads_number):
+            compressedRepresentation = torch.cat((compressedRepresentation, self.headsAttentionList[headIndex](utteranceRepresentation.view(utteranceRepresentation.size(0), self.kernel_size, self.heads_size))[0]),dim=1)    
+        return compressedRepresentation, alignment
+
+
 
