@@ -258,9 +258,9 @@ if __name__=="__main__":
     parser.add_argument('--data_mode', type = str, default = 'normal', choices=['normal','window'])
     parser.add_argument('--valid_clients', type = str, default='labels/clients.ndx')
     parser.add_argument('--valid_impostors', type = str, default='labels/impostors.ndx')
-    parser.add_argument('--out_dir', type=str, default='./models/model1', help='directory where data is saved')
+    parser.add_argument('--out_dir', type=str, default='./models/model', help='directory where data is saved')
     parser.add_argument('--model_name', type=str, default='CNN', help='Model associated to the model builded')
-    parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L'], help='Kind of Front-end Used')
+    parser.add_argument('--front_end', type=str, default='VGG4L', choices = ['VGG3L','VGG4L', 'RepVGG4L'], help='Kind of Front-end Used')
     
     # Network Parameteres
     parser.add_argument('--window_size', type=float, default=3.5, help='number of seconds per window')
